@@ -96,9 +96,8 @@ app.get("/edit/:id", async (req, res) => {
 });
 
 // 수정
-app.post("/update/:id", async (req, res) => {
+app.post("/edit", async (req, res) => {
   const inputdata = req.body;
-  console.log(inputdata);
   try {
     if (inputdata.title === "" || inputdata.content === "") {
       console.log("데이터가 입력되지 않음");
@@ -107,7 +106,7 @@ app.post("/update/:id", async (req, res) => {
       await db
         .collection("post")
         .updateOne(
-          { _id: new ObjectId(req.params.id) },
+          { _id: new ObjectId(inputdata.id) },
           { $set: { title: inputdata.title, content: inputdata.content } }
         );
       res.redirect("/list");
