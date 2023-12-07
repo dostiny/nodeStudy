@@ -92,7 +92,6 @@ app.get("/edit/:id", async (req, res) => {
   } catch (err) {
     console.log(err);
   }
-  res.render("edit.ejs");
 });
 
 // 수정
