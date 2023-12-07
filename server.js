@@ -80,3 +80,40 @@ app.get("/detail/:id", async (req, res) => {
     res.status(400).send("이상한 url 접속함");
   }
 });
+
+// 수정 페이지
+app.get("/edit/:id", async (req, res) => {
+  try {
+    let result = await db
+      .collection("post")
+      .findOne({ _id: new ObjectId(req.params.id) });
+    console.log(result);
+    res.render("edit.ejs", { post: result });
+  } catch (err) {
+    console.log(err);
+  }
+  res.render("edit.ejs");
+});
+
+// 수정
+app.post("/update/:id", async (req, res) => {
+  const inputdata = req.body;
+  console.log(inputdata);
+  try {
+    if (inputdata.title === "" || inputdata.content === "") {
+      console.log("데이터가 입력되지 않음");
+      res.redirect("/write");
+    } else {
+      await db
+        .collection("post")
+        .updateOne(
+          { _id: new ObjectId(req.params.id) },
+          { $set: { title: inputdata.title, content: inputdata.content } }
+        );
+      res.redirect("/list");
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("서버에러");
+  }
+});
