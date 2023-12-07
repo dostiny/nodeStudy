@@ -3,6 +3,8 @@ const app = express();
 
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const { MongoClient } = require("mongodb");
 
@@ -35,4 +37,27 @@ app.get("/list", async (req, res) => {
   console.log(result);
   // res.send(result[0].title);
   res.render("list.ejs", { posts: result });
+});
+
+app.get("/write", (req, res) => {
+  res.render("write.ejs");
+});
+
+app.post("/add", async (req, res) => {
+  const inputdata = req.body;
+  // console.log(inputdata);
+  try {
+    if (inputdata.title === "" || inputdata.content === "") {
+      console.log("데이터가 입력되지 않음");
+      res.redirect("/write");
+    } else {
+      await db
+        .collection("post")
+        .insertOne({ title: inputdata.title, content: inputdata.content });
+      res.redirect("/list");
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("서버에러");
+  }
 });
