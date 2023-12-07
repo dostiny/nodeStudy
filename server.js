@@ -1,12 +1,11 @@
 const express = require("express");
 const app = express();
+const { MongoClient, ObjectId } = require("mongodb");
 
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-const { MongoClient } = require("mongodb");
 
 let db;
 const url =
@@ -24,14 +23,17 @@ new MongoClient(url)
     console.log(err);
   });
 
+// 메인페이지
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
+// 페이지 이동
 app.get("/news", (req, res) => {
   res.send("오늘 비옴");
 });
 
+// list.ejs 페이지 띄우기
 app.get("/list", async (req, res) => {
   let result = await db.collection("post").find().toArray();
   console.log(result);
@@ -39,10 +41,12 @@ app.get("/list", async (req, res) => {
   res.render("list.ejs", { posts: result });
 });
 
+// 글쓰는 페이지 이동
 app.get("/write", (req, res) => {
   res.render("write.ejs");
 });
 
+// 글쓰는 페이지에서 폼 데이터 저장
 app.post("/add", async (req, res) => {
   const inputdata = req.body;
   // console.log(inputdata);
@@ -59,5 +63,20 @@ app.post("/add", async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).send("서버에러");
+  }
+});
+
+// 디테일 페이지
+app.get("/detail/:id", async (req, res) => {
+  // console.log(req.params);
+  try {
+    let result = await db
+      .collection("post")
+      .findOne({ _id: new ObjectId(req.params.id) });
+    console.log(result);
+    res.render("detail.ejs", { post: result });
+  } catch (err) {
+    console.log(err);
+    res.status(400).send("이상한 url 접속함");
   }
 });
